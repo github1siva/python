@@ -1,0 +1,32 @@
+from neo4j import GraphDatabase
+import json
+
+# Connect to Neo4j
+uri = ""
+username = ""
+password = ""
+driver = GraphDatabase.driver(uri, auth=(username, password))
+
+
+# Load data from the JSON file
+with open('new_target_collection_cs256.json', 'r') as json_file:
+    data = json.load(json_file)
+
+# Define a function to insert data into Neo4j
+def insert_data_into_neo4j(data):
+    with driver.session() as session:
+        for item in data:
+            # Extract relevant information
+            document_name = item['document_name']
+            chunk = item['raw_chunk']
+            embeddings = item['embeddings']
+            objective = item['objective']
+            index_to_start = item['index_to_start']
+
+            # Insert node into Neo4j
+            session.run("CREATE (n:ARD_Document {name: $name, chunk: $chunk, embeddings: $embeddings, objective: $objective, index_to_start: $index_to_start})", 
+                        name=document_name, chunk=chunk, embeddings=embeddings, objective=objective, index_to_start=index_to_start)
+            # You can add more properties or relationships as needed
+
+# Insert data into Neo4j
+insert_data_into_neo4j(data)
